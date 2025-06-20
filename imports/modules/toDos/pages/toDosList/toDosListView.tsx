@@ -24,15 +24,15 @@ const ToDosListView = () => {
     SearchContainer
   } = ToDosListStyles;
 
-	const options = [{ value: '', label: 'Nenhum' }, ...(controller.schema.type.options?.() ?? [])];
+	const options = [{ value: '', label: 'Todas as categorias' }, ...(controller.schema.category?.options?.() ?? [])];
 
 	return (
 		<Container>
-			<Typography variant="h5">Lista de Itens</Typography>
+			<Typography variant="h5">Lista de Tarefas</Typography>
 			<SearchContainer>
 				<SysTextField
 					name="search"
-					placeholder="Pesquisar por nome"
+					placeholder="Pesquisar por título"
 					onChange={controller.onChangeTextField}
 					startAdornment={<SysIcon name={'search'} />}
 				/>
@@ -40,7 +40,7 @@ const ToDosListView = () => {
 					name="Category"
 					label="Categoria"
 					options={options}
-					placeholder="Selecionar"
+					placeholder="Selecionar categoria"
 					onChange={controller.onChangeCategory}
 				/>
 			</SearchContainer>
@@ -55,18 +55,18 @@ const ToDosListView = () => {
 						data={controller.todoList}
 						schema={controller.schema}
 						onRowClick={(row) => navigate('/toDos/view/' + row.id)}
-						searchPlaceholder={'Pesquisar exemplo'}
+						searchPlaceholder={'Pesquisar tarefa'}
 						onEdit={(row) => navigate('/toDos/edit/' + row._id)}
 						onDelete={(row) => {
 							DeleteDialog({
 								showDialog: sysLayoutContext.showDialog,
 								closeDialog: sysLayoutContext.closeDialog,
-								title: `Excluir dado ${row.title}`,
-								message: `Tem certeza que deseja excluir o arquivo ${row.title}?`,
+								title: `Excluir tarefa ${row.title}`,
+								message: `Tem certeza que deseja excluir a tarefa "${row.title}"?`,
 								onDeleteConfirm: () => {
 									controller.onDeleteButtonClick(row);
 									sysLayoutContext.showNotification({
-										message: 'Excluído com sucesso!'
+										message: 'Tarefa excluída com sucesso!'
 									});
 								}
 							});
@@ -77,7 +77,7 @@ const ToDosListView = () => {
 
 			<SysFab
 				variant="extended"
-				text="Adicionar"
+				text="Nova Tarefa"
 				startIcon={<SysIcon name={'add'} />}
 				fixed={true}
 				onClick={controller.onAddButtonClick}
