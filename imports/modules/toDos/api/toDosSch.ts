@@ -78,7 +78,7 @@ export interface IToDos extends IDoc {
 	category: string;
 	dueDate: Date;
 	completed: boolean;
-	tags: string;
+	tags: string[];
 	notes: string;
 	attachments: object[];
 }
