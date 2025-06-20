@@ -38,8 +38,14 @@ const initialConfig = {
 const ToDosListController = () => {
 	const [config, setConfig] = React.useState<IInitialConfig>(initialConfig);
 
-	const { title, type, typeMulti } = toDosApi.getSchema();
-	const toDosSchReduzido = { title, type, typeMulti, createdat: { type: Date, label: 'Criado em' } };
+	const { title, priority, category } = toDosApi.getSchema();
+	const toDosSchReduzido = { 
+		title, 
+		priority, 
+		category, 
+		completed: { type: Boolean, label: 'Status' },
+		createdat: { type: Date, label: 'Criado em' } 
+	};
 	const navigate = useNavigate();
 
 	const { sortProperties, filter } = config;
@@ -86,12 +92,12 @@ const ToDosListController = () => {
 				...prev,
 				filter: {
 					...prev.filter,
-					type: { $ne: null }
+					category: { $ne: null }
 				}
 			}));
 			return;
 		}
-		setConfig((prev) => ({ ...prev, filter: { ...prev.filter, type: value } }));
+		setConfig((prev) => ({ ...prev, filter: { ...prev.filter, category: value } }));
 	}, []);
 
 	const providerValues: IToDosListContollerContext = useMemo(
