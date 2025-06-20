@@ -37,7 +37,6 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 					category: 1,
 					dueDate: 1,
 					completed: 1,
-					tags: 1,
 					notes: 1,
 					attachments: 1
 				}

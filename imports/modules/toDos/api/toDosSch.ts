@@ -50,12 +50,6 @@ export const toDosSch: ISchema<IToDos> = {
 		defaultValue: false,
 		optional: true
 	},
-	tags: {
-		type: Array<String>,
-		label: 'Tags',
-		defaultValue: '',
-		optional: true
-	},
 	notes: {
 		type: String,
 		label: 'Observações',
@@ -78,7 +72,6 @@ export interface IToDos extends IDoc {
 	category: string;
 	dueDate: Date;
 	completed: boolean;
-	tags: string[];
 	notes: string;
 	attachments: object[];
 }
