@@ -19,7 +19,7 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 			'toDosList',
 			(filter = {}) => {
 				return this.defaultListCollectionPublication(filter, {
-					projection: { title: 1, type: 1, typeMulti: 1, createdat: 1 }
+					projection: { title: 1, priority: 1, category: 1, completed: 1, createdat: 1 }
 				});
 			},
 			(doc: IToDos & { nomeUsuario: string }) => {
@@ -31,20 +31,34 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 		this.addPublication('toDosDetail', (filter = {}) => {
 			return this.defaultDetailCollectionPublication(filter, {
 				projection: {
-					contacts: 1,
 					title: 1,
 					description: 1,
-					type: 1,
-					typeMulti: 1,
-					date: 1,
-					files: 1,
-					chip: 1,
-					statusRadio: 1,
-					statusToggle: 1,
-					slider: 1,
-					check: 1,
-					address: 1
+					priority: 1,
+					category: 1,
+					dueDate: 1,
+					completed: 1,
+					tags: 1,
+					notes: 1,
+					attachments: 1
 				}
+			});
+		});
+
+		// Nova publicação para buscar as últimas 5 tarefas do usuário
+		this.addPublication('recentToDos', (filter = {}) => {
+			return this.defaultCollectionPublication(filter, {
+				projection: { 
+					title: 1, 
+					description: 1, 
+					completed: 1, 
+					priority: 1,
+					category: 1,
+					dueDate: 1,
+					createdat: 1,
+					lastupdate: 1
+				},
+				sort: { lastupdate: -1, createdat: -1 },
+				limit: 5
 			});
 		});
 
