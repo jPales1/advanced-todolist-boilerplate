@@ -1,6 +1,7 @@
 import { Recurso as Exemplo } from '/imports/modules/example/config/recursos';
 import { Recurso as Aniversario } from '/imports/modules/aniversario/config/recursos';
 import { Recurso as Usuarios } from '/imports/modules/userprofile/config/recurso';
+import { Recurso as ToDos } from '/imports/modules/toDos/config/recursos';
 import { RoleType } from '/imports/security/config/roleType';
 import { HomeResources, SysFormTestPageResources } from '/imports/sysPages/config/resources';
 
@@ -15,6 +16,7 @@ const _mapRolesRecursos: MapRolesRecursos = {
 		..._getAllValues(HomeResources),
 		..._getAllValues(SysFormTestPageResources),
 		..._getAllValues(Aniversario),
+		..._getAllValues(ToDos),
 		Usuarios.USUARIO_UPDATE,
 		Usuarios.USUARIO_VIEW,	
 	],
