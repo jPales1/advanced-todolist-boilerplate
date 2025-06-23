@@ -23,7 +23,7 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 				});
 			},
 			(doc: IToDos & { nomeUsuario: string }) => {
-				const userProfileDoc = userprofileServerApi.getCollectionInstance().findOne({ _id: doc.createdby });
+				const userProfileDoc = userprofileServerApi.getCollectionInstance().findOneAsync({ _id: doc.createdby });
 				return { ...doc };
 			}
 		);
@@ -54,7 +54,8 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 					category: 1,
 					dueDate: 1,
 					createdat: 1,
-					lastupdate: 1
+					lastupdate: 1,
+					createdby: 1
 				},
 				sort: { lastupdate: -1, createdat: -1 },
 				limit: 5
