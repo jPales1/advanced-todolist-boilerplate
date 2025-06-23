@@ -22,9 +22,9 @@ import { ptBR } from 'date-fns/locale';
 const RecentActivities: React.FC = () => {
 	const navigate = useNavigate();
 	const user = getUser();
+	const userId = user?._id;
 
 	const { recentToDos, loading } = useTracker(() => {
-		const userId = user?._id;
 		if (!userId) {
 			return { recentToDos: [], loading: false };
 		}
@@ -40,21 +40,31 @@ const RecentActivities: React.FC = () => {
 			recentToDos,
 			loading: !!subHandle && !subHandle.ready()
 		};
-	}, [user]);
+	}, [userId]);
 
 	const handleGoToTasks = () => {
 		navigate('/toDos');
+	};
+
+	const handleCreateSampleTasks = () => {
+		Meteor.call('fixtures.createSampleTasks', (error: any, result: string) => {
+			if (error) {
+				console.error('Erro ao criar tarefas de exemplo:', error);
+			} else {
+				console.log(result);
+			}
+		});
 	};
 
 	const getStatusLabel = (todo: IToDos) => {
 		return todo.completed ? 'Concluída' : 'Pendente';
 	};
 
-	const getStatusColor = (todo: IToDos) => {
+	const getStatusColor = (todo: IToDos): "success" | "warning" => {
 		return todo.completed ? 'success' : 'warning';
 	};
 
-	const getPriorityColor = (priority: string) => {
+	const getPriorityColor = (priority: string): "error" | "warning" | "info" | "default" => {
 		switch (priority) {
 			case 'alta': return 'error';
 			case 'media': return 'warning';
@@ -62,6 +72,8 @@ const RecentActivities: React.FC = () => {
 			default: return 'default';
 		}
 	};
+
+	console.log('RecentActivities render - loading:', loading, 'tasks:', recentToDos.length);
 
 	if (loading) {
 		return (
@@ -90,9 +102,27 @@ const RecentActivities: React.FC = () => {
 				</Box>
 
 				{recentToDos.length === 0 ? (
-					<Typography color="textSecondary">
-						Nenhuma tarefa encontrada. Comece criando sua primeira tarefa!
-					</Typography>
+					<Box textAlign="center" py={3}>
+						<Typography color="textSecondary" paragraph>
+							Nenhuma tarefa encontrada. Comece criando sua primeira tarefa!
+						</Typography>
+						<Box display="flex" gap={2} justifyContent="center">
+							<Button 
+								variant="outlined" 
+								color="secondary" 
+								onClick={handleCreateSampleTasks}
+							>
+								Criar Tarefas de Exemplo
+							</Button>
+							<Button 
+								variant="contained" 
+								color="primary" 
+								onClick={handleGoToTasks}
+							>
+								Criar Nova Tarefa
+							</Button>
+						</Box>
+					</Box>
 				) : (
 					<List>
 						{recentToDos.map((todo, index) => (
