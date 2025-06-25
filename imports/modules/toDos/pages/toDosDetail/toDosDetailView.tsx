@@ -8,12 +8,10 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import { SysSelectField } from '/imports/ui/components/sysFormFields/sysSelectField/sysSelectField';
-import { SysRadioButton } from '/imports/ui/components/sysFormFields/sysRadioButton/sysRadioButton';
 import { SysCheckBox } from '/imports/ui/components/sysFormFields/sysCheckBoxField/sysCheckBoxField';
 import SysFormButton from '/imports/ui/components/sysFormFields/sysFormButton/sysFormButton';
 import { SysUploadFile } from '/imports/ui/components/sysFormFields/sysUploadFile/sysUploadFile';
-import SysSlider from '/imports/ui/components/sysFormFields/sysSlider/sysSliderField';
-import { SysLocationField } from '/imports/ui/components/sysFormFields/sysLocationField/sysLocationField';
+import { SysDatePickerField } from '/imports/ui/components/sysFormFields/sysDatePickerField/sysDatePickerField';
 import SysIcon from '/imports/ui/components/sysIcon/sysIcon';
 
 const ToDosDetailView = () => {
@@ -39,7 +37,7 @@ const ToDosDetailView = () => {
 					</IconButton>
 				)}
 				<Typography variant="h5" sx={{ flexGrow: 1 }}>
-					{isCreate ? 'Adicionar Item' : isEdit ? 'Editar Item' : controller.document.title}
+					{isCreate ? 'Adicionar Tarefa' : isEdit ? 'Editar Tarefa' : controller.document.title}
 				</Typography>
 				<IconButton
 					onClick={!isView ? controller.closePage : () => controller.changeToEdit(controller.document._id || '')}>
@@ -54,24 +52,30 @@ const ToDosDetailView = () => {
 				loading={controller.loading}>
 				<Body>
 					<FormColumn>
-						<SysTextField name="title" placeholder="Ex.: Item XX" />
-						<SysSelectField name="type" placeholder="Selecionar" />
-						<SysRadioButton name="typeMulti" childrenAlignment="row" size="small" />
+						<SysTextField name="title" placeholder="Ex.: Estudar React" />
 						<SysTextField
 							name="description"
-							placeholder="Acrescente informações sobre o item (3 linhas)"
+							placeholder="Descrição da tarefa"
 							multiline
 							rows={3}
 							maxRows={3}
 							showNumberCharactersTyped
-							max={200}
+							max={500}
 						/>
-						<SysUploadFile name="files" />
-						<SysSlider name="slider" />
-						<SysLocationField name="address" />
+						<SysSelectField name="priority" placeholder="Selecionar prioridade" />
+						<SysSelectField name="category" placeholder="Selecionar categoria" />
 					</FormColumn>
 					<FormColumn>
-						<SysCheckBox name="check" childrenAlignment="row" />
+						<SysDatePickerField name="dueDate" />
+						<SysCheckBox name="completed" label="Tarefa concluída" />
+						<SysTextField
+							name="notes"
+							placeholder="Observações adicionais"
+							multiline
+							rows={3}
+							maxRows={5}
+						/>
+						<SysUploadFile name="attachments" />
 					</FormColumn>
 				</Body>
 				<Footer>
