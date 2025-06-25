@@ -45,23 +45,29 @@ const ToDosDetailController = () => {
 
 	const onSubmit = useCallback((doc: IToDos) => {
 		const selectedAction = state === 'create' ? 'insert' : 'update';
+		
+		// Garantir que novas tarefas sejam criadas com status "Não concluída"
+		if (selectedAction === 'insert') {
+			doc.completed = false;
+		}
+		
 		toDosApi[selectedAction](doc, (e: IMeteorError) => {
 			if (!e) {
 				closePage();
 				showNotification({
 					type: 'success',
-					title: 'Operação realizada!',
-					message: `O exemplo foi ${selectedAction === 'update' ? 'atualizado' : 'cadastrado'} com sucesso!`
+					title: 'Sucesso!',
+					message: `Tarefa ${selectedAction === 'update' ? 'atualizada' : 'inserida'} com sucesso!`
 				});
 			} else {
 				showNotification({
 					type: 'error',
-					title: 'Operação não realizada!',
-					message: `Erro ao realizar a operação: ${e.reason}`
+					title: 'Erro!',
+					message: `Falha ao ${selectedAction === 'update' ? 'atualizar' : 'inserir'} a tarefa: ${e.reason}`
 				});
 			}
 		});
-	}, []);
+	}, [state, closePage, showNotification]);
 
 	return (
 		<ToDosDetailControllerContext.Provider
