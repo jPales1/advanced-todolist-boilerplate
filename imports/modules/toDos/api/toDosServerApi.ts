@@ -19,12 +19,15 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 			'toDosList',
 			(filter = {}) => {
 				return this.defaultListCollectionPublication(filter, {
-					projection: { title: 1, priority: 1, category: 1, completed: 1, createdat: 1 }
+					projection: { title: 1, description: 1, priority: 1, category: 1, completed: 1, createdat: 1, createdby: 1 }
 				});
 			},
-			(doc: IToDos & { nomeUsuario: string }) => {
-				const userProfileDoc = userprofileServerApi.getCollectionInstance().findOneAsync({ _id: doc.createdby });
-				return { ...doc };
+			async (doc: IToDos & { nomeUsuario: string }) => {
+				const userProfileDoc = await userprofileServerApi.getCollectionInstance().findOneAsync({ _id: doc.createdby });
+				return { 
+					...doc, 
+					nomeUsuario: userProfileDoc?.username || 'Usuário Desconhecido'
+				};
 			}
 		);
 
