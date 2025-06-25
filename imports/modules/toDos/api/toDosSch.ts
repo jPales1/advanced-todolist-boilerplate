@@ -12,7 +12,7 @@ export const toDosSch: ISchema<IToDos> = {
 		type: String,
 		label: 'Descrição',
 		defaultValue: '',
-		optional: true
+		optional: false
 	},
 	priority: {
 		type: String,
