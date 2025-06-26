@@ -82,6 +82,8 @@ const ToDosListView = () => {
 											onChange={() => controller.handleToggleComplete(task)}
 											color="success"
 											sx={{ mr: 1, ml: 2 }}
+											disabled={!controller.canEditTask(task)}
+											title={!controller.canEditTask(task) ? 'Você só pode alterar o status de suas próprias tarefas' : undefined}
 										/>
 										<Box
 											sx={{
@@ -152,9 +154,11 @@ const ToDosListView = () => {
 											<ListItemSecondaryAction>
 												<Box display="flex" alignItems="center" gap={1}>
 													{task.completed && <SysIcon name="task" sx={{ color: 'success.main', fontSize: 20 }} />}
-													<IconButton edge="end" aria-label="more" onClick={(e) => controller.handleMenuClick(e, task)}>
-														<SysIcon name="moreVert" />
-													</IconButton>
+													{(controller.canEditTask(task) || controller.canDeleteTask(task)) && (
+														<IconButton edge="end" aria-label="more" onClick={(e) => controller.handleMenuClick(e, task)}>
+															<SysIcon name="moreVert" />
+														</IconButton>
+													)}
 												</Box>
 											</ListItemSecondaryAction>
 										</Box>
@@ -174,14 +178,18 @@ const ToDosListView = () => {
 			)}
 
 			<Menu anchorEl={controller.anchorEl} open={Boolean(controller.anchorEl)} onClose={controller.handleMenuClose}>
-				<MenuItem onClick={() => controller.handleEdit()}>
-					<SysIcon name="edit" sx={{ mr: 1 }} />
-					Editar
-				</MenuItem>
-				<MenuItem onClick={controller.handleDelete}>
-					<SysIcon name="delete" sx={{ mr: 1 }} />
-					Excluir
-				</MenuItem>
+				{controller.selectedTask && controller.canEditTask(controller.selectedTask) && (
+					<MenuItem onClick={() => controller.handleEdit()}>
+						<SysIcon name="edit" sx={{ mr: 1 }} />
+						Editar
+					</MenuItem>
+				)}
+				{controller.selectedTask && controller.canDeleteTask(controller.selectedTask) && (
+					<MenuItem onClick={controller.handleDelete}>
+						<SysIcon name="delete" sx={{ mr: 1 }} />
+						Excluir
+					</MenuItem>
+				)}
 			</Menu>
 
 			<SysFab
@@ -329,22 +337,24 @@ const ToDosListView = () => {
 							</DrawerInfoSection>
 						</DrawerContent>
 
-						{/* Footer Actions */}
+						{/* Footer Actions com verificação de permissões */}
 						<DrawerFooter>
 							<Box display="flex" gap={1} flexDirection="column">
-								<Button
-									onClick={() => {
-										if (controller.viewingTask) {
-											controller.handleCloseModal();
-											controller.handleEdit(controller.viewingTask);
-										}
-									}}
-									color="primary"
-									variant="contained"
-									fullWidth
-									startIcon={<SysIcon name="edit" />}>
-									Editar Tarefa
-								</Button>
+								{controller.canEditTask(controller.viewingTask) && (
+									<Button
+										onClick={() => {
+											if (controller.viewingTask) {
+												controller.handleCloseModal();
+												controller.handleEdit(controller.viewingTask);
+											}
+										}}
+										color="primary"
+										variant="contained"
+										fullWidth
+										startIcon={<SysIcon name="edit" />}>
+										Editar Tarefa
+									</Button>
+								)}
 								<Button onClick={controller.handleCloseModal} color="inherit" fullWidth>
 									Fechar
 								</Button>
