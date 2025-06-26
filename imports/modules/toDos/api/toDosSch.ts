@@ -62,6 +62,12 @@ export const toDosSch: ISchema<IToDos> = {
 		defaultValue: '',
 		optional: true,
 		isUpload: true
+	},
+	isPersonal: {
+		type: Boolean,
+		label: 'Tarefa Pessoal',
+		defaultValue: false,
+		optional: true
 	}
 };
 
@@ -74,4 +80,5 @@ export interface IToDos extends IDoc {
 	completed: boolean;
 	notes: string;
 	attachments: object[];
+	isPersonal: boolean;
 }
