@@ -51,19 +51,19 @@ const ToDosDetailController = () => {
 			doc.completed = false;
 		}
 		
-		toDosApi[selectedAction](doc, (e: IMeteorError) => {
+		toDosApi[selectedAction](doc, (e: IMeteorError, result: any) => {
 			if (!e) {
 				closePage();
 				showNotification({
 					type: 'success',
 					title: 'Sucesso!',
-					message: `Tarefa ${selectedAction === 'update' ? 'atualizada' : 'inserida'} com sucesso!`
+					message: result?.message || `Tarefa ${selectedAction === 'update' ? 'atualizada' : 'inserida'} com sucesso!`
 				});
 			} else {
 				showNotification({
 					type: 'error',
 					title: 'Erro!',
-					message: `Falha ao ${selectedAction === 'update' ? 'atualizar' : 'inserir'} a tarefa: ${e.reason}`
+					message: e.message || e.reason || `Falha ao ${selectedAction === 'update' ? 'atualizar' : 'inserir'} a tarefa`
 				});
 			}
 		});
