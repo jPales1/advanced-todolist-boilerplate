@@ -57,7 +57,7 @@ const ToDosDetailView = () => {
 							name="description"
 							placeholder="Descrição da tarefa"
 							multiline
-							rows={3}
+							minRows={3}
 							maxRows={3}
 							showNumberCharactersTyped
 							max={500}
@@ -72,7 +72,7 @@ const ToDosDetailView = () => {
 							name="notes"
 							placeholder="Observações adicionais"
 							multiline
-							rows={3}
+							minRows={3}
 							maxRows={5}
 						/>
 						<SysUploadFile name="attachments" />
