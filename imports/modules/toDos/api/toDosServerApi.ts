@@ -19,9 +19,22 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 
 		this.addTransformedPublication(
 			'toDosList',
-			(filter = {}) => {
-				return this.defaultListCollectionPublication(filter, {
-					projection: { title: 1, description: 1, priority: 1, category: 1, completed: 1, createdat: 1, createdby: 1 }
+			async (filter = {}) => {
+				const currentUser = await getUserServer();
+				if (!currentUser) {
+					throw new Meteor.Error('not-authorized', 'Usuário não autenticado');
+				}
+
+				const taskFilter = {
+					...filter,
+					$or: [
+						{ isPersonal: { $ne: true } },
+						{ $and: [{ isPersonal: true }, { createdby: currentUser._id }] }
+					]
+				};
+
+				return this.defaultListCollectionPublication(taskFilter as any, {
+					projection: { title: 1, description: 1, priority: 1, category: 1, completed: 1, isPersonal: 1, createdat: 1, createdby: 1 }
 				});
 			},
 			async (doc: IToDos & { nomeUsuario: string }) => {
@@ -33,8 +46,21 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 			}
 		);
 
-		this.addPublication('toDosDetail', (filter = {}) => {
-			return this.defaultDetailCollectionPublication(filter, {
+		this.addPublication('toDosDetail', async (filter = {}) => {
+			const currentUser = await getUserServer();
+			if (!currentUser) {
+				throw new Meteor.Error('not-authorized', 'Usuário não autenticado');
+			}
+
+			const taskFilter = {
+				...filter,
+				$or: [
+					{ isPersonal: { $ne: true } },
+					{ $and: [{ isPersonal: true }, { createdby: currentUser._id }] }
+				]
+			};
+
+			return this.defaultDetailCollectionPublication(taskFilter as any, {
 				projection: {
 					title: 1,
 					description: 1,
@@ -43,14 +69,30 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 					dueDate: 1,
 					completed: 1,
 					notes: 1,
-					attachments: 1
+					attachments: 1,
+					isPersonal: 1,
+					createdby: 1
 				}
 			});
 		});
 
 		// Nova publicação para buscar as últimas 5 tarefas do usuário
-		this.addPublication('recentToDos', (filter = {}) => {
-			return this.defaultCollectionPublication(filter, {
+		this.addPublication('recentToDos', async (filter = {}) => {
+			const currentUser = await getUserServer();
+			if (!currentUser) {
+				throw new Meteor.Error('not-authorized', 'Usuário não autenticado');
+			}
+
+			// Aplicar filtro de privacidade
+			const taskFilter = {
+				...filter,
+				$or: [
+					{ isPersonal: { $ne: true } }, // Tarefas não-pessoais
+					{ $and: [{ isPersonal: true }, { createdby: currentUser._id }] } // Tarefas pessoais do usuário
+				]
+			};
+
+			return this.defaultCollectionPublication(taskFilter as any, {
 				projection: { 
 					title: 1, 
 					description: 1, 
@@ -58,6 +100,7 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 					priority: 1,
 					category: 1,
 					dueDate: 1,
+					isPersonal: 1,
 					createdat: 1,
 					lastupdate: 1,
 					createdby: 1
@@ -111,8 +154,14 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 			throw new Meteor.Error('not-authorized', 'Usuário não autenticado');
 		}
 
+		// Verificar se o usuário pode editar a tarefa
 		if (existingTask.createdby !== currentUser._id) {
 			throw new Meteor.Error('not-authorized', 'Você só pode editar tarefas criadas por você');
+		}
+
+		// Se a tarefa é pessoal, garantir que apenas o criador pode acessá-la
+		if (existingTask.isPersonal && existingTask.createdby !== currentUser._id) {
+			throw new Meteor.Error('not-authorized', 'Esta é uma tarefa pessoal de outro usuário');
 		}
 
 		return result;
@@ -131,8 +180,14 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 			throw new Meteor.Error('not-authorized', 'Usuário não autenticado');
 		}
 
+		// Verificar se o usuário pode remover a tarefa
 		if (existingTask.createdby !== currentUser._id) {
 			throw new Meteor.Error('not-authorized', 'Você só pode excluir tarefas criadas por você');
+		}
+
+		// Se a tarefa é pessoal, garantir que apenas o criador pode acessá-la
+		if (existingTask.isPersonal && existingTask.createdby !== currentUser._id) {
+			throw new Meteor.Error('not-authorized', 'Esta é uma tarefa pessoal de outro usuário');
 		}
 
 		return result;
