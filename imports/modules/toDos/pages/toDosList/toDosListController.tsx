@@ -8,6 +8,7 @@ import { IToDos } from '../../api/toDosSch';
 import { toDosApi } from '../../api/toDosApi';
 import AppLayoutContext, { IAppLayoutContext } from '/imports/app/appLayoutProvider/appLayoutContext';
 import DeleteDialog from '/imports/ui/appComponents/showDialog/custom/deleteDialog/deleteDialog';
+import { getUser } from '/imports/libs/getUser';
 
 interface IInitialConfig {
 	sortProperties: { field: string; sortAscending: boolean };
@@ -37,6 +38,8 @@ interface IToDosListContollerContext {
 	selectedTask: IToDos | null;
 	viewModalOpen: boolean;
 	viewingTask: IToDos | null;
+	canEditTask: (task: IToDos) => boolean;
+	canDeleteTask: (task: IToDos) => boolean;
 }
 
 export const ToDosListControllerContext = React.createContext<IToDosListContollerContext>(
@@ -117,18 +120,44 @@ const ToDosListController = () => {
 		setSelectedTask(null);
 	}, []);
 
+	const currentUser = getUser();
+
+	const canEditTask = useCallback((task: IToDos) => {
+		return currentUser && task.createdby === currentUser._id;
+	}, [currentUser]);
+
+	const canDeleteTask = useCallback((task: IToDos) => {
+		return currentUser && task.createdby === currentUser._id;
+	}, [currentUser]);
+
 	const handleEdit = useCallback((task?: IToDos) => {
 		const taskToEdit = task || selectedTask;
 		if (taskToEdit) {
+			if (!canEditTask(taskToEdit)) {
+				showNotification({
+					type: 'warning',
+					message: 'Você só pode editar tarefas criadas por você'
+				});
+				return;
+			}
 			navigate('/toDos/edit/' + taskToEdit._id);
 		}
-		if (!task) { // Só fecha menu se chamado do menu contextual
+		if (!task) {
 			handleMenuClose();
 		}
-	}, [selectedTask, navigate, handleMenuClose]);
+	}, [selectedTask, navigate, handleMenuClose, canEditTask, showNotification]);
 
 	const handleDelete = useCallback(() => {
 		if (selectedTask) {
+			if (!canDeleteTask(selectedTask)) {
+				showNotification({
+					type: 'warning',
+					message: 'Você só pode excluir tarefas criadas por você'
+				});
+				handleMenuClose();
+				return;
+			}
+
 			DeleteDialog({
 				showDialog,
 				closeDialog,
@@ -152,7 +181,7 @@ const ToDosListController = () => {
 			});
 		}
 		handleMenuClose();
-	}, [selectedTask, showDialog, closeDialog, showNotification, handleMenuClose]);
+	}, [selectedTask, showDialog, closeDialog, showNotification, handleMenuClose, canDeleteTask]);
 
 	const handleTaskClick = useCallback((task: IToDos) => {
 		setViewingTask(task);
@@ -237,9 +266,11 @@ const ToDosListController = () => {
 			anchorEl,
 			selectedTask,
 			viewModalOpen,
-			viewingTask
+			viewingTask,
+			canEditTask,
+			canDeleteTask
 		}),
-		[toDoss, loading, getCategoryIcon, getPriorityColor, handleMenuClick, handleMenuClose, handleEdit, handleDelete, handleTaskClick, handleToggleComplete, handleCloseModal, anchorEl, selectedTask, viewModalOpen, viewingTask, showNotification]
+		[toDoss, loading, getCategoryIcon, getPriorityColor, handleMenuClick, handleMenuClose, handleEdit, handleDelete, handleTaskClick, handleToggleComplete, handleCloseModal, anchorEl, selectedTask, viewModalOpen, viewingTask, showNotification, canEditTask, canDeleteTask]
 	);
 
 	return (
