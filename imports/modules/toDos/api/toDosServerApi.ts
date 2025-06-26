@@ -4,6 +4,7 @@ import { toDosSch, IToDos } from './toDosSch';
 import { userprofileServerApi } from '/imports/modules/userprofile/api/userProfileServerApi';
 import { ProductServerBase } from '/imports/api/productServerBase';
 import { IContext } from '/imports/typings/IContext';
+import { getUserServer } from '/imports/modules/userprofile/api/userProfileServerApi';
 
 // endregion
 
@@ -95,6 +96,46 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 		// 	},
 		// 	['get']
 		// );
+	}
+
+	async beforeUpdate(docObj: IToDos | Partial<IToDos>, context: IContext) {
+		const result = await super.beforeUpdate(docObj, context);
+		
+		const existingTask = await this.getCollectionInstance().findOneAsync({ _id: docObj._id });
+		if (!existingTask) {
+			throw new Meteor.Error('not-found', 'Tarefa não encontrada');
+		}
+
+		const currentUser = await getUserServer();
+		if (!currentUser) {
+			throw new Meteor.Error('not-authorized', 'Usuário não autenticado');
+		}
+
+		if (existingTask.createdby !== currentUser._id) {
+			throw new Meteor.Error('not-authorized', 'Você só pode editar tarefas criadas por você');
+		}
+
+		return result;
+	}
+
+	async beforeRemove(docObj: IToDos | Partial<IToDos>, context: IContext) {
+		const result = await super.beforeRemove(docObj, context);
+		
+		const existingTask = await this.getCollectionInstance().findOneAsync({ _id: docObj._id });
+		if (!existingTask) {
+			throw new Meteor.Error('not-found', 'Tarefa não encontrada');
+		}
+
+		const currentUser = await getUserServer();
+		if (!currentUser) {
+			throw new Meteor.Error('not-authorized', 'Usuário não autenticado');
+		}
+
+		if (existingTask.createdby !== currentUser._id) {
+			throw new Meteor.Error('not-authorized', 'Você só pode excluir tarefas criadas por você');
+		}
+
+		return result;
 	}
 
 	// Métodos de sucesso
