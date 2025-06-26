@@ -3,6 +3,7 @@ import { Recurso } from '../config/recursos';
 import { toDosSch, IToDos } from './toDosSch';
 import { userprofileServerApi } from '/imports/modules/userprofile/api/userProfileServerApi';
 import { ProductServerBase } from '/imports/api/productServerBase';
+import { IContext } from '/imports/typings/IContext';
 
 // endregion
 
@@ -94,6 +95,53 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 		// 	},
 		// 	['get']
 		// );
+	}
+
+	// Métodos de sucesso
+	async afterInsert(docObj: IToDos | Partial<IToDos>, context?: IContext) {
+		const result = await super.afterInsert(docObj, context);
+		return {
+			...result,
+			success: true,
+			message: `Tarefa "${docObj.title}" criada com sucesso!`
+		};
+	}
+
+	async afterUpdate(docObj: IToDos, context: IContext) {
+		const result = await super.afterUpdate(docObj, context);
+		return {
+			...result,
+			success: true,
+			message: `Tarefa "${docObj.title}" atualizada com sucesso!`
+		};
+	}
+
+	async afterRemove(docObj: IToDos | Partial<IToDos>, context: IContext) {
+		const result = await super.afterRemove(docObj, context);
+		return {
+			...result,
+			success: true,
+			message: `Tarefa "${docObj.title}" excluída com sucesso!`
+		};
+	}
+
+	// Métodos de erro
+	onInsertError(doc: Partial<IToDos>, error: any): void {
+		console.error('Erro ao inserir tarefa:', error);
+		const customError = new Error(`Erro ao criar tarefa "${doc.title}": ${error.reason || error.message || 'Erro desconhecido'}`);
+		throw customError;
+	}
+
+	onUpdateError(doc: Partial<IToDos>, error: any): void {
+		console.error('Erro ao atualizar tarefa:', error);
+		const customError = new Error(`Erro ao atualizar tarefa "${doc.title}": ${error.reason || error.message || 'Erro desconhecido'}`);
+		throw customError;
+	}
+
+	onRemoveError(doc: Partial<IToDos>, error: any): void {
+		console.error('Erro ao remover tarefa:', error);
+		const customError = new Error(`Erro ao excluir tarefa "${doc.title}": ${error.reason || error.message || 'Erro desconhecido'}`);
+		throw customError;
 	}
 }
 
