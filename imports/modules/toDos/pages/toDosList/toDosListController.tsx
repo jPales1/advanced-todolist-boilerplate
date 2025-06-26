@@ -28,12 +28,15 @@ interface IToDosListContollerContext {
 	getPriorityColor: (priority: string) => string;
 	handleMenuClick: (event: React.MouseEvent<HTMLElement>, task: IToDos) => void;
 	handleMenuClose: () => void;
-	handleEdit: () => void;
+	handleEdit: (task?: IToDos) => void;
 	handleDelete: () => void;
 	handleTaskClick: (task: IToDos) => void;
 	handleToggleComplete: (task: IToDos) => void;
+	handleCloseModal: () => void;
 	anchorEl: HTMLElement | null;
 	selectedTask: IToDos | null;
+	viewModalOpen: boolean;
+	viewingTask: IToDos | null;
 }
 
 export const ToDosListControllerContext = React.createContext<IToDosListContollerContext>(
@@ -51,6 +54,8 @@ const ToDosListController = () => {
 	const [config, setConfig] = React.useState<IInitialConfig>(initialConfig);
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const [selectedTask, setSelectedTask] = React.useState<IToDos | null>(null);
+	const [viewModalOpen, setViewModalOpen] = React.useState<boolean>(false);
+	const [viewingTask, setViewingTask] = React.useState<IToDos | null>(null);
 	const { showDialog, closeDialog, showNotification } = useContext<IAppLayoutContext>(AppLayoutContext);
 
 	const { title, description, priority, category } = toDosApi.getSchema();
@@ -112,11 +117,14 @@ const ToDosListController = () => {
 		setSelectedTask(null);
 	}, []);
 
-	const handleEdit = useCallback(() => {
-		if (selectedTask) {
-			navigate('/toDos/edit/' + selectedTask._id);
+	const handleEdit = useCallback((task?: IToDos) => {
+		const taskToEdit = task || selectedTask;
+		if (taskToEdit) {
+			navigate('/toDos/edit/' + taskToEdit._id);
 		}
-		handleMenuClose();
+		if (!task) { // Só fecha menu se chamado do menu contextual
+			handleMenuClose();
+		}
 	}, [selectedTask, navigate, handleMenuClose]);
 
 	const handleDelete = useCallback(() => {
@@ -127,9 +135,18 @@ const ToDosListController = () => {
 				title: `Excluir tarefa ${selectedTask.title}`,
 				message: `Tem certeza que deseja excluir a tarefa "${selectedTask.title}"?`,
 				onDeleteConfirm: () => {
-					toDosApi.remove(selectedTask);
-					showNotification({
-						message: 'Tarefa excluída com sucesso!'
+					toDosApi.remove(selectedTask, (e: any, result: any) => {
+						if (!e) {
+							showNotification({
+								type: 'success',
+								message: result?.message || 'Tarefa excluída com sucesso!'
+							});
+						} else {
+							showNotification({
+								type: 'error',
+								message: e.message || e.reason || 'Erro ao excluir tarefa'
+							});
+						}
 					});
 				}
 			});
@@ -138,17 +155,31 @@ const ToDosListController = () => {
 	}, [selectedTask, showDialog, closeDialog, showNotification, handleMenuClose]);
 
 	const handleTaskClick = useCallback((task: IToDos) => {
-		navigate('/toDos/view/' + task._id);
-	}, [navigate]);
+		setViewingTask(task);
+		setViewModalOpen(true);
+	}, []);
+
+	const handleCloseModal = useCallback(() => {
+		setViewModalOpen(false);
+		setViewingTask(null);
+	}, []);
 
 	const handleToggleComplete = useCallback((task: IToDos) => {
 		const updatedTask = { ...task, completed: !task.completed };
-		toDosApi.update(updatedTask, (e: any) => {
-			if (e) {
-				console.error('Erro ao atualizar tarefa:', e);
+		toDosApi.update(updatedTask, (e: any, result: any) => {
+			if (!e) {
+				showNotification({
+					type: 'success',
+					message: result?.message || `Tarefa ${updatedTask.completed ? 'concluída' : 'reaberta'} com sucesso!`
+				});
+			} else {
+				showNotification({
+					type: 'error',
+					message: e.message || e.reason || 'Erro ao atualizar status da tarefa'
+				});
 			}
 		});
-	}, []);
+	}, [showNotification]);
 
 	const onAddButtonClick = useCallback(() => {
 		const newDocumentId = nanoid();
@@ -202,10 +233,13 @@ const ToDosListController = () => {
 			handleDelete,
 			handleTaskClick,
 			handleToggleComplete,
+			handleCloseModal,
 			anchorEl,
-			selectedTask
+			selectedTask,
+			viewModalOpen,
+			viewingTask
 		}),
-		[toDoss, loading, getCategoryIcon, getPriorityColor, handleMenuClick, handleMenuClose, handleEdit, handleDelete, handleTaskClick, handleToggleComplete, anchorEl, selectedTask]
+		[toDoss, loading, getCategoryIcon, getPriorityColor, handleMenuClick, handleMenuClose, handleEdit, handleDelete, handleTaskClick, handleToggleComplete, handleCloseModal, anchorEl, selectedTask, viewModalOpen, viewingTask, showNotification]
 	);
 
 	return (
