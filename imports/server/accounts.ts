@@ -217,7 +217,7 @@ Meteor.startup(() => {
 	});
 
 	Accounts.config({
-		sendVerificationEmail: true,
+		sendVerificationEmail: false, // Desabilita verificação obrigatória por email
 		forbidClientAccountCreation: false // impede que um usuário seja criado pelo cliente
 	});
 
@@ -239,9 +239,9 @@ Meteor.startup(() => {
 			};
 			return validateLoginGoogle(user);
 		}
-		if (!user || !user.emails || !user.emails[0].verified) {
-			throw new Meteor.Error('Email ñao verificado', `Este email ainda não foi verificado!`);
-		}
+		
+		// Para login com senha, não exige verificação de email
+		// Usuários criados com senha podem logar imediatamente
 		return true;
 	});
 });
