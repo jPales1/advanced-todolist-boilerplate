@@ -12,6 +12,7 @@ import { SysCheckBox } from '/imports/ui/components/sysFormFields/sysCheckBoxFie
 import SysFormButton from '/imports/ui/components/sysFormFields/sysFormButton/sysFormButton';
 import { SysUploadFile } from '/imports/ui/components/sysFormFields/sysUploadFile/sysUploadFile';
 import { SysDatePickerField } from '/imports/ui/components/sysFormFields/sysDatePickerField/sysDatePickerField';
+import SysSwitch from '/imports/ui/components/sysFormFields/sysSwitch/sysSwitch';
 import SysIcon from '/imports/ui/components/sysIcon/sysIcon';
 
 const ToDosDetailView = () => {
@@ -68,6 +69,11 @@ const ToDosDetailView = () => {
 					<FormColumn>
 						<SysDatePickerField name="dueDate" />
 						<SysCheckBox name="completed" label="Tarefa concluída" />
+						<SysSwitch 
+							name="isPersonal" 
+							label="Tarefa Pessoal"
+							valueLabel="Apenas eu posso ver esta tarefa"
+						/>
 						<SysTextField
 							name="notes"
 							placeholder="Observações adicionais"
