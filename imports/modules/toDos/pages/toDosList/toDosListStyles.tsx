@@ -8,6 +8,11 @@ interface IToDosListStyles {
 	Container: ElementType<BoxProps>;
 	LoadingContainer: ElementType<BoxProps>;
 	SearchContainer: ElementType<BoxProps>;
+	DrawerContainer: ElementType<BoxProps>;
+	DrawerHeader: ElementType<BoxProps>;
+	DrawerContent: ElementType<BoxProps>;
+	DrawerFooter: ElementType<BoxProps>;
+	DrawerInfoSection: ElementType<BoxProps>;
 }
 
 const ToDosListStyles: IToDosListStyles = {
@@ -42,6 +47,29 @@ const ToDosListStyles: IToDosListStyles = {
 		[theme.breakpoints.down('sm')]: {
 			flexDirection: 'column'
 		}
+	})),
+	DrawerContainer: styled(Box)(() => ({
+		height: '100%',
+		display: 'flex',
+		flexDirection: 'column'
+	})),
+	DrawerHeader: styled(Box)(({ theme }) => ({
+		padding: theme.spacing(3),
+		borderBottom: '1px solid',
+		borderColor: theme.palette.divider
+	})),
+	DrawerContent: styled(Box)(({ theme }) => ({
+		flex: 1,
+		padding: theme.spacing(3),
+		overflow: 'auto'
+	})),
+	DrawerFooter: styled(Box)(({ theme }) => ({
+		padding: theme.spacing(3),
+		borderTop: '1px solid',
+		borderColor: theme.palette.divider
+	})),
+	DrawerInfoSection: styled(Box)(({ theme }) => ({
+		marginBottom: theme.spacing(3)
 	}))
 };
 
