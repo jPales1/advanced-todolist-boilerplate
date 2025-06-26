@@ -351,9 +351,9 @@ class UserProfileServerApi extends ProductServerBase<IUserProfile> {
 
 	async afterInsert(doc: IUserProfileEstendido, _context: IContext) {
 		if (Meteor.isServer) {
-			if (doc.password) {
-				Accounts.sendVerificationEmail(doc._id!);
-			} else {
+			// Não envia mais emails de verificação para usuários com senha
+			// Usuários podem fazer login imediatamente após o cadastro
+			if (!doc.password) {
 				Accounts.sendEnrollmentEmail(doc._id!);
 			}
 		}
