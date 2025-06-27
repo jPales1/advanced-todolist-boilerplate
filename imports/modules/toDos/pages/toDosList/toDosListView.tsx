@@ -48,7 +48,7 @@ const ToDosListView = () => {
 			<SearchContainer>
 				<SysTextField
 					name="search"
-					placeholder="Pesquisar por título"
+					placeholder="Pesquisar"
 					onChange={controller.onChangeTextField}
 					startAdornment={<SysIcon name={'search'} />}
 				/>
