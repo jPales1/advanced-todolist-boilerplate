@@ -222,10 +222,27 @@ const ToDosListController = () => {
 	const onChangeTextField = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = event.target;
 		const delayedSearch = setTimeout(() => {
-			setConfig((prev) => ({
-				...prev,
-				filter: { ...prev.filter, title: { $regex: value.trim(), $options: 'i' } }
-			}));
+			if (value.trim()) {
+				setConfig((prev) => ({
+					...prev,
+					filter: { 
+						...prev.filter, 
+						$or: [
+							{ title: { $regex: value.trim(), $options: 'i' } },
+							{ description: { $regex: value.trim(), $options: 'i' } }
+						]
+					}
+				}));
+			} else {
+				// Remove o filtro de pesquisa quando o campo está vazio
+				setConfig((prev) => {
+					const { $or, title, ...restFilter } = prev.filter as any;
+					return {
+						...prev,
+						filter: restFilter
+					};
+				});
+			}
 		}, 1000);
 		return () => clearTimeout(delayedSearch);
 	}, []);
@@ -270,7 +287,7 @@ const ToDosListController = () => {
 			canEditTask,
 			canDeleteTask
 		}),
-		[toDoss, loading, getCategoryIcon, getPriorityColor, handleMenuClick, handleMenuClose, handleEdit, handleDelete, handleTaskClick, handleToggleComplete, handleCloseModal, anchorEl, selectedTask, viewModalOpen, viewingTask, showNotification, canEditTask, canDeleteTask]
+		[toDoss, loading, handleEdit, handleDelete, handleToggleComplete, anchorEl, selectedTask, viewModalOpen, viewingTask, canEditTask, canDeleteTask ]
 	);
 
 	return (
