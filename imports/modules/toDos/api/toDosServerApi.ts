@@ -25,16 +25,39 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 					throw new Meteor.Error('not-authorized', 'Usuário não autenticado');
 				}
 
-				const taskFilter = {
-					...filter,
-					$or: [
-						{ isPersonal: { $ne: true } },
-						{ $and: [{ isPersonal: true }, { createdby: currentUser._id }] }
-					]
+				const { $or: searchOr, ...otherFilters } = filter as any;
+
+				const privacyFilter = {
+					$or: [{ isPersonal: { $ne: true } }, { $and: [{ isPersonal: true }, { createdby: currentUser._id }] }]
 				};
 
+				let taskFilter;
+				if (searchOr) {
+					taskFilter = {
+						$and: [
+							privacyFilter,
+							{ $or: searchOr },
+							...Object.keys(otherFilters).map((key) => ({ [key]: otherFilters[key] }))
+						]
+					};
+				} else {
+					taskFilter = {
+						...otherFilters,
+						...privacyFilter
+					};
+				}
+
 				return this.defaultListCollectionPublication(taskFilter as any, {
-					projection: { title: 1, description: 1, priority: 1, category: 1, completed: 1, isPersonal: 1, createdat: 1, createdby: 1 }
+					projection: {
+						title: 1,
+						description: 1,
+						priority: 1,
+						category: 1,
+						completed: 1,
+						isPersonal: 1,
+						createdat: 1,
+						createdby: 1
+					}
 				});
 			},
 			async (doc: IToDos & { nomeUsuario: string }) => {
@@ -169,7 +192,7 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 
 	async beforeRemove(docObj: IToDos | Partial<IToDos>, context: IContext) {
 		const result = await super.beforeRemove(docObj, context);
-		
+  
 		const existingTask = await this.getCollectionInstance().findOneAsync({ _id: docObj._id });
 		if (!existingTask) {
 			throw new Meteor.Error('not-found', 'Tarefa não encontrada');
@@ -224,19 +247,25 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 	// Métodos de erro
 	onInsertError(doc: Partial<IToDos>, error: any): void {
 		console.error('Erro ao inserir tarefa:', error);
-		const customError = new Error(`Erro ao criar tarefa "${doc.title}": ${error.reason || error.message || 'Erro desconhecido'}`);
+		const customError = new Error(
+			`Erro ao criar tarefa "${doc.title}": ${error.reason || error.message || 'Erro desconhecido'}`
+		);
 		throw customError;
 	}
 
 	onUpdateError(doc: Partial<IToDos>, error: any): void {
 		console.error('Erro ao atualizar tarefa:', error);
-		const customError = new Error(`Erro ao atualizar tarefa "${doc.title}": ${error.reason || error.message || 'Erro desconhecido'}`);
+		const customError = new Error(
+			`Erro ao atualizar tarefa "${doc.title}": ${error.reason || error.message || 'Erro desconhecido'}`
+		);
 		throw customError;
 	}
 
 	onRemoveError(doc: Partial<IToDos>, error: any): void {
 		console.error('Erro ao remover tarefa:', error);
-		const customError = new Error(`Erro ao excluir tarefa "${doc.title}": ${error.reason || error.message || 'Erro desconhecido'}`);
+		const customError = new Error(
+			`Erro ao excluir tarefa "${doc.title}": ${error.reason || error.message || 'Erro desconhecido'}`
+		);
 		throw customError;
 	}
 }
