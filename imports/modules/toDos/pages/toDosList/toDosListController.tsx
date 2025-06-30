@@ -15,6 +15,10 @@ interface IInitialConfig {
 	filter: Object;
 	searchBy: string | null;
 	viewComplexTable: boolean;
+	pagination: {
+		page: number;
+		limit: number;
+	};
 }
 
 interface IToDosListContollerContext {
@@ -40,6 +44,15 @@ interface IToDosListContollerContext {
 	viewingTask: IToDos | null;
 	canEditTask: (task: IToDos) => boolean;
 	canDeleteTask: (task: IToDos) => boolean;
+	// Propriedades de paginação
+	currentPage: number;
+	totalPages: number;
+	hasNextPage: boolean;
+	hasPrevPage: boolean;
+	onNextPage: () => void;
+	onPrevPage: () => void;
+	onPageChange: (page: number) => void;
+	totalTasks: number;
 }
 
 export const ToDosListControllerContext = React.createContext<IToDosListContollerContext>(
@@ -50,7 +63,11 @@ const initialConfig = {
 	sortProperties: { field: 'createdat', sortAscending: true },
 	filter: {},
 	searchBy: null,
-	viewComplexTable: false
+	viewComplexTable: false,
+	pagination: {
+		page: 0,
+		limit: 4
+	}
 };
 
 const ToDosListController = () => {
@@ -72,22 +89,39 @@ const ToDosListController = () => {
 	};
 	const navigate = useNavigate();
 
-	const { sortProperties, filter } = config;
+	const { sortProperties, filter, pagination } = config;
 	const sort = {
 		[sortProperties.field]: sortProperties.sortAscending ? 1 : -1
 	};
 
+	const [totalTasks, setTotalTasks] = React.useState<number>(0);
+
 	const { loading, toDoss } = useTracker(() => {
 		const subHandle = toDosApi.subscribe('toDosList', filter, {
+			page: pagination.page,
+			limit: pagination.limit,
 			sort
 		});
+		
 		const toDoss = subHandle?.ready() ? toDosApi.find(filter, { sort }).fetch() : [];
+		
 		return {
 			toDoss,
-			loading: !!subHandle && !subHandle.ready(),
-			total: subHandle ? subHandle.total : toDoss.length
+			loading: !!subHandle && !subHandle.ready()
 		};
 	}, [config]);
+
+	// Buscar contagem total usando método Meteor
+	React.useEffect(() => {
+		Meteor.call('toDos.count', filter, (error: any, result: number) => {
+			if (!error && typeof result === 'number') {
+				setTotalTasks(result);
+			} else {
+				console.error('Erro ao obter contagem:', error);
+				setTotalTasks(0);
+			}
+		});
+	}, [filter]);
 
 	const getCategoryIcon = useCallback((category: string): "domain" | "person" | "science" | "favorite" | "shoppingCart" | "task" => {
 		switch (category) {
@@ -231,6 +265,10 @@ const ToDosListController = () => {
 							{ title: { $regex: value.trim(), $options: 'i' } },
 							{ description: { $regex: value.trim(), $options: 'i' } }
 						]
+					},
+					pagination: {
+						...prev.pagination,
+						page: 0 // Resetar para a primeira página
 					}
 				}));
 			} else {
@@ -239,7 +277,11 @@ const ToDosListController = () => {
 					const { $or, title, ...restFilter } = prev.filter as any;
 					return {
 						...prev,
-						filter: restFilter
+						filter: restFilter,
+						pagination: {
+							...prev.pagination,
+							page: 0 // Resetar para a primeira página
+						}
 					};
 				});
 			}
@@ -255,12 +297,65 @@ const ToDosListController = () => {
 				filter: {
 					...prev.filter,
 					category: { $ne: null }
+				},
+				pagination: {
+					...prev.pagination,
+					page: 0 // Resetar para a primeira página
 				}
 			}));
 			return;
 		}
-		setConfig((prev) => ({ ...prev, filter: { ...prev.filter, category: value } }));
+		setConfig((prev) => ({ 
+			...prev, 
+			filter: { ...prev.filter, category: value },
+			pagination: {
+				...prev.pagination,
+				page: 0 // Resetar para a primeira página
+			}
+		}));
 	}, []);
+
+	// Propriedades e funções de paginação
+	const totalPages = Math.ceil(totalTasks / pagination.limit);
+	const currentPage = pagination.page;
+	const hasNextPage = currentPage < totalPages - 1;
+	const hasPrevPage = currentPage > 0;
+
+	const onNextPage = useCallback(() => {
+		if (hasNextPage) {
+			setConfig((prev) => ({
+				...prev,
+				pagination: {
+					...prev.pagination,
+					page: prev.pagination.page + 1
+				}
+			}));
+		}
+	}, [hasNextPage]);
+
+	const onPrevPage = useCallback(() => {
+		if (hasPrevPage) {
+			setConfig((prev) => ({
+				...prev,
+				pagination: {
+					...prev.pagination,
+					page: prev.pagination.page - 1
+				}
+			}));
+		}
+	}, [hasPrevPage]);
+
+	const onPageChange = useCallback((page: number) => {
+		if (page >= 0 && page < totalPages) {
+			setConfig((prev) => ({
+				...prev,
+				pagination: {
+					...prev.pagination,
+					page
+				}
+			}));
+		}
+	}, [totalPages]);
 
 	const providerValues: IToDosListContollerContext = useMemo(
 		() => ({
@@ -285,9 +380,18 @@ const ToDosListController = () => {
 			viewModalOpen,
 			viewingTask,
 			canEditTask,
-			canDeleteTask
+			canDeleteTask,
+			// Propriedades de paginação
+			currentPage,
+			totalPages,
+			hasNextPage,
+			hasPrevPage,
+			onNextPage,
+			onPrevPage,
+			onPageChange,
+			totalTasks
 		}),
-		[toDoss, loading, handleEdit, handleDelete, handleToggleComplete, anchorEl, selectedTask, viewModalOpen, viewingTask, canEditTask, canDeleteTask ]
+		[toDoss, loading, handleEdit, handleDelete, handleToggleComplete, anchorEl, selectedTask, viewModalOpen, viewingTask, canEditTask, canDeleteTask, currentPage, totalPages, hasNextPage, hasPrevPage, onNextPage, onPrevPage, onPageChange, totalTasks]
 	);
 
 	return (
