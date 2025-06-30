@@ -22,7 +22,9 @@ import {
 	Divider,
 	Checkbox,
 	Drawer,
-	Button
+	Button,
+	Pagination,
+	Stack
 } from '@mui/material';
 import { IToDos } from '../../api/toDosSch';
 
@@ -43,7 +45,7 @@ const ToDosListView = () => {
 	const options = [{ value: '', label: 'Todas as categorias' }, ...(controller.schema.category?.options?.() ?? [])];
 
 	return (
-		<Container>
+		<Container sx={{ height: 'auto' }}>
 			<Typography variant="h5">Lista de Tarefas</Typography>
 			<SearchContainer>
 				<SysTextField
@@ -67,7 +69,7 @@ const ToDosListView = () => {
 					<Typography variant="body1">Aguarde, carregando informações...</Typography>
 				</LoadingContainer>
 			) : (
-				<Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
+				<Box sx={{ width: '100%', bgcolor: 'background.paper'}}>
 					{controller.todoList && controller.todoList.length > 0 ? (
 						<List>
 							{controller.todoList.map((task: IToDos & { nomeUsuario?: string }, index: number) => (
@@ -172,6 +174,28 @@ const ToDosListView = () => {
 							<Typography variant="body1" color="textSecondary">
 								Nenhuma tarefa encontrada.
 							</Typography>
+						</Box>
+					)}
+					
+					{/* Controles de Paginação */}
+					{controller.totalPages > 1 && (
+						<Box display="flex" justifyContent="center" alignItems="center" mt={3} mb={2}>
+							<Stack spacing={2} alignItems="center">
+								<Pagination
+									count={controller.totalPages}
+									page={controller.currentPage + 1}
+									onChange={(_, page) => controller.onPageChange(page - 1)}
+									color="primary"
+									showFirstButton
+									showLastButton
+									variant="outlined"
+									shape="rounded"
+								/>
+								<Typography variant="body2" color="textSecondary">
+									Página {controller.currentPage + 1} de {controller.totalPages} • 
+									Total: {controller.totalTasks} tarefas
+								</Typography>
+							</Stack>
 						</Box>
 					)}
 				</Box>
