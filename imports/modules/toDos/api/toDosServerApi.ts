@@ -19,13 +19,18 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 
 		this.addTransformedPublication(
 			'toDosList',
-			async (filter = {}) => {
+			async (filter = {}, options = {}) => {
 				const currentUser = await getUserServer();
 				if (!currentUser) {
 					throw new Meteor.Error('not-authorized', 'Usuário não autenticado');
 				}
 
 				const { $or: searchOr, ...otherFilters } = filter as any;
+				const { page = 0, limit = 4, sort = { createdat: -1 } } = options as any;
+
+				// Garantir que o limite máximo seja de 4 tarefas por página
+				const actualLimit = Math.min(limit, 4);
+				const skip = page * actualLimit;
 
 				const privacyFilter = {
 					$or: [{ isPersonal: { $ne: true } }, { $and: [{ isPersonal: true }, { createdby: currentUser._id }] }]
@@ -57,7 +62,10 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 						isPersonal: 1,
 						createdat: 1,
 						createdby: 1
-					}
+					},
+					sort,
+					limit: actualLimit,
+					skip
 				});
 			},
 			async (doc: IToDos & { nomeUsuario: string }) => {
@@ -271,3 +279,38 @@ class ToDosServerApi extends ProductServerBase<IToDos> {
 }
 
 export const toDosServerApi = new ToDosServerApi();
+
+// Método simples para contar tarefas
+Meteor.methods({
+	async 'toDos.count'(filter: any) {
+		const currentUser = await getUserServer();
+		if (!currentUser) {
+			throw new Meteor.Error('not-authorized', 'Usuário não autenticado');
+		}
+
+		const { $or: searchOr, ...otherFilters } = filter || {};
+
+		const privacyFilter = {
+			$or: [{ isPersonal: { $ne: true } }, { $and: [{ isPersonal: true }, { createdby: currentUser._id }] }]
+		};
+
+		let taskFilter;
+		if (searchOr) {
+			taskFilter = {
+				$and: [
+					privacyFilter,
+					{ $or: searchOr },
+					...Object.keys(otherFilters).map((key) => ({ [key]: otherFilters[key] }))
+				]
+			};
+		} else {
+			taskFilter = {
+				...otherFilters,
+				...privacyFilter
+			};
+		}
+
+		const count = await toDosServerApi.getCollectionInstance().find(taskFilter).countAsync();
+		return count;
+	}
+});
