@@ -12,8 +12,8 @@ const pages: Array<IRoute | null> = [
 ];
 
 const menuItens: Array<IAppMenu | null> = [
-	...Example.pagesMenuItemList, 
-	...Aniversario.pagesMenuItemList,
+	// ...Example.pagesMenuItemList, 
+	// ...Aniversario.pagesMenuItemList,
 	...UserProfile.pagesMenuItemList,
 	...ToDos.pagesMenuItemList
 ];
