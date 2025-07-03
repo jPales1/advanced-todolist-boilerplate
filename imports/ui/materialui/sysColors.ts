@@ -123,9 +123,9 @@ const sysLightPalette: PaletteOptions = {
   common: sysCommonColors,
 
   primary: {
-    light: sysPurpleColors[70],
-    main: sysPurpleColors[50]!,
-    dark: sysPurpleColors[30],
+    light: sysNeonColors[70],
+    main: sysNeonColors[50]!,
+    dark: sysNeonColors[30],
     contrastText: sysCommonColors.white
   },
 
@@ -137,9 +137,9 @@ const sysLightPalette: PaletteOptions = {
   },
 
   tertiary: {
-    light: sysNeonColors[97],
-    main: sysNeonColors[90]!,
-    dark: sysNeonColors[60],
+    light: sysPurpleColors[97],
+    main: sysPurpleColors[90]!,
+    dark: sysPurpleColors[60],
     contrastText: sysGreyColors[20]
   },
 
@@ -184,9 +184,9 @@ const sysLightPalette: PaletteOptions = {
     disabled: sysGreyColors[70],
     base: sysCommonColors.white,
     baseContrast: sysCommonColors.black,
-    primary: sysPurpleColors[50],
+    primary: sysNeonColors[50],
     secondary: sysGreenColors[80],
-    tertiary: sysNeonColors[90],
+    tertiary: sysPurpleColors[90],
   },
   background: {
     paper: sysCommonColors.white,
@@ -200,10 +200,10 @@ const sysLightPalette: PaletteOptions = {
     bg3: sysGreyColors[90],
   },
   sysAction: {
-    primary: sysPurpleColors[50],
-    primaryHover: sysPurpleColors[30],
-    primaryBgHover: sysPurpleColors.transparent,
-    primaryIcon: sysPurpleColors.grey,
+    primary: sysNeonColors[50],
+    primaryHover: sysNeonColors[30],
+    primaryBgHover: sysNeonColors.transparent,
+    primaryIcon: sysNeonColors.grey,
     primaryContrastText: sysCommonColors.white,
     primaryContrastBg: sysGreyColors.transparent,
     disabled: sysGreyColors[70],
