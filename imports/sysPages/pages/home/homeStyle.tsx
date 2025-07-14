@@ -2,6 +2,7 @@ import { ElementType } from 'react';
 import { styled } from '@mui/material/styles';
 import Box, { BoxProps } from '@mui/material/Box';
 import {SysSectionPaddingXY} from "/imports/ui/layoutComponents/sysLayoutComponents";
+import { sysSizing } from '/imports/ui/materialui/styles';
 
 interface IHomeStyles {
 	Container: ElementType<BoxProps>;
@@ -15,7 +16,7 @@ const HomeStyles: IHomeStyles = {
 		flexDirection: 'column',
 		alignItems: 'flex-start',
 		justifyContent: 'flex-start',
-		gap: '2.5rem',
+		gap: sysSizing.spacingRemXs,
 		width: '100%',
 	})),
 	Header: styled(Box)(({}) => ({
