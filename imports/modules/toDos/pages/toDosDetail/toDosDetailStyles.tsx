@@ -14,6 +14,7 @@ interface IToDosDetailStyles {
 
 const ToDosDetailStyles: IToDosDetailStyles = {
 	Container: styled(SysSectionPaddingXY)(() => ({
+		width: '100%',
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'flex-start',
