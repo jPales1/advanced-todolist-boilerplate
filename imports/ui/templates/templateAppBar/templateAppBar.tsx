@@ -29,15 +29,8 @@ export const TemplateAppBar: React.FC<ITemplateAppBar> = ({
 
 const BoilerplateLogo: React.FC = () => {
 	return (
-		<Typography
-			variant="subtitle1"
-			color={(theme) => theme.palette.sysText?.tertiary}
-			sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-			{'{ '}
-			<Typography color={(theme) => theme.palette.primary.contrastText} variant="inherit">
+			<Typography color={(theme) => theme.palette.primary.contrastText} variant="body1" fontWeight={600}>
 				ToDo List
-			</Typography>{' '}
-			{'}'}
-		</Typography>
+			</Typography>
 	);
 };
